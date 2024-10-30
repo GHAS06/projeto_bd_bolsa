@@ -1,0 +1,200 @@
+Vamos usar a Biblioteca nativa do python chamada de "zipfile"
+Com ela podemos manipular arquivos.csv, arquvos.zip, compactar e descompactar arquivos zip
+ler arquivos zip, extrair dados e etc...
+
+1 - Importe a biblioteca, escreva
+
+import zipfile 
+
+2 - Saber o caminho do seu arquivo zip
+
+caminho_zip = "c:/pasta1/meu_zip.zip"
+
+3 - Entender as ferramentas básicas da blibioteca
+    
+    Lembre-se: Uma biblioteca na computação é um conjunto de códigos prontos que fornecem 
+    funções, classes ou módulos para serem reutilizados em programas. 
+    Elas ajudam a resolver problemas específicos sem que você precise escrever tudo do zero.
+    Por exemplo, uma biblioteca para manipulação de arquivos ZIP, como a zipfile em Python,
+    já tem todas as funções prontas para abrir, criar, extrair e compactar arquivos ZIP.
+    Em vez de você implementar esses processos manualmente, você só usa as funções dela, 
+    ganhando tempo e evitando erros.
+    Essencialmente, bibliotecas são como ferramentas especializadas que os programadores
+    podem "importar" para realizar tarefas complexas com facilidade e eficiência.
+
+                   Entendo OBJETOS DO MÓDULO zipfile (biblioteca)
+    
+    classe zipfile.ZipFile(
+        arquivo, # é o o caminho onde está o seu arquivo.zip
+        modo='r', # basicamente define como você ira manipular seu o arquivo.zip
+        compactação=ZIP_STORED, # Define o método de compactação 
+        allowZip64=Verdadeiro, # Permite criar arquivos.zip Maior que 4GB 
+        nível de compactação=Nenhum, # Controle o nível de compactação
+        *, 
+        strict_timestamps=Verdadeiro, metadata_encoding=Nenhum
+    ):
+
+    Módulo (zipfile): É o pacote que você importa, contendo todas as funcionalidades para 
+    trabalhar com arquivos ZIP.
+    Detalhe: Um módulo é uma parte de uma biblioteca. Um módulo é um único arquivo Python 
+    (com a extensão .py) que contém funções, classes e variáveis. 
+    Por exemplo, o arquivo math.py é um módulo que fornece funções matemáticas.
+
+    Classe (ZipFile): É uma estrutura dentro do módulo que define como trabalhar
+    com arquivos ZIP. Essa classe possui métodos e atributos que permitem criar, 
+    abrir, ler e extrair arquivos ZIP.
+    Detalhe: A Classe é a forma do OBJETO, a estrutura que será materialziada pelo OBJETO.
+                        
+                        Dentro da Classe ZipFile 
+    arquivo -> O caminho do arquivo ZIP que você quer abrir ou criar. 
+    Exemplo: 'meu_arquivo.zip'.
+
+    modo-> Define como o ZIP será manipulado:
+
+        'r': Leitura (abre um ZIP existente para ler).
+        'w': Escrita (cria um ZIP novo ou substitui o existente).
+        'a': Adição (abre o ZIP para adicionar arquivos sem apagar os que já estão nele).
+        'x': Exclusivo (cria um ZIP novo, mas dá erro se o arquivo já existe).
+    
+    compactacao -> Define o método de compactação dos arquivos:
+        
+        ZIP_STORED: Sem compactação, apenas armazena os arquivos.
+        ZIP_DEFLATED: Usa compressão, reduzindo o tamanho do ZIP.
+        ZIP_BZIP2 e ZIP_LZMA: Outros métodos de compressão, mas nem sempre são suportados.
+    
+    allowZip64 -> Permite a criação de arquivos ZIP maiores que 4GB. 
+    Se True (o padrão), você pode criar arquivos grandes.
+
+    nivel_de_compactacao -> controla o nível de compactação (se o método de compactação permitir). 
+    É um valor entre 0 (sem compactação) e 9 (máxima compactação).
+
+    strict_timestamps -> Quando True, mantém o timestamp exato dos arquivos. 
+    Define se os arquivos ZIP mantêm a data/hora de criação exata dos arquivos originais.
+
+    metadata_encoding -> Define a codificação para metadados, caso o ZIP contenha 
+    caracteres especiais no nome dos arquivos. Normalmente não precisa ser modificado.
+
+                        OBJETOS
+  
+    ZipFile.open(name, mode='r', pwd=None, *, force_zip64=False) -> Acesse um membro do arquivo 
+    como um objeto binário semelhante a um arquivo. 
+    name pode ser o nome de um arquivo dentro do arquivo ou de um objeto.
+    O parâmetro mode, se incluído, deve ser (o padrão e por padrão retorna abre o arqiuvo em modo binário),
+    pwd é a senha usada para descriptografar arquivos ZIP criptografados como um objeto.'r''w'
+
+    ZipFile.close() -> Feche o arquivo compactado. Você deve ligar antes de sair do programa
+    ou registros essenciais não serão gravados. 
+    
+    ZipFile.getinfo(name) -> Retorna um objeto com informações sobre o nome do membro do arquivo. 
+    Chamar um nome não contido atualmente no arquivo irá gerar um arquivo .
+    
+    ZipFile.infolist() -> Retorne uma lista contendo um objeto para cada membro do arquivo.
+    Os objetos estão na mesma ordem que suas entradas no endereço real arquivo no disco se
+    um arquivo existente foi aberto.
+    
+    ZipFile.namelist() -> Retorna uma lista de membros do arquivo por nome.
+
+    ZipFile.extract(member, path=None, pwd=None) ->  é utilizado para extrair um arquivo específico 
+    dentro de um arquivo .zip
+    
+    member: é o nome ou o caminho relativo do arquivo dentro do .zip que você deseja extrair. 
+    Ele deve corresponder ao caminho do arquivo dentro do .zip, e é obrigatório.
+
+    path: é o caminho onde o arquivo extraído será salvo. 
+    Se path não for especificado, o arquivo será extraído no diretório de trabalho atual.
+
+    pwd: é a senha do arquivo .zip, caso ele esteja protegido por senha. 
+    O valor deve ser passado como um objeto bytes (por exemplo, b"minha_senha"). 
+    Se o .zip não tiver senha, este parâmetro pode ser omitido.
+
+    ZipFile.extractall(path=None, members=None, pwd=None) -> permite extrair todos 
+    ou alguns arquivos de um arquivo .zip de uma só vez. 
+    Tem os memos parâmetroas do de cima e mesmas funcionalidades
+
+    ZipFile.read(name, pwd=None) -> permite ler o conteúdo de um arquivo específico 
+    dentro de um arquivo .zip sem extraí-lo para o sistema de arquivos.
+    Em vez disso, ele retorna o conteúdo do arquivo como um objeto bytes, 
+    permitindo que você o processe diretamente na memória.
+
+    name: o nome ou caminho relativo do arquivo dentro do .zip que você deseja ler. 
+    Este parâmetro é obrigatório e deve corresponder exatamente ao caminho do a
+    rquivo dentro do .zip.
+
+    pwd: a senha do arquivo .zip, caso ele esteja protegido. O valor deve ser passado
+    como um objeto bytes (por exemplo, b"minha_senha").
+    Se o .zip não tiver senha, este parâmetro pode ser omitido.
+
+    ZipFile.write(filename, arcname=None, compress_type=None, compresslevel=None) -> utilizado 
+    para adicionar arquivos a um arquivo .zip. 
+    Ele permite especificar o nome do arquivo original, 
+    o nome que o arquivo terá dentro do .zip, 
+    o tipo de compressão e o nível de compressão. 
+    
+    filename: caminho para o arquivo que você quer adicionar ao .zip. 
+    Este parâmetro é obrigatório.
+
+    arcname: nome que o arquivo terá dentro do .zip. Por padrão, ele será o mesmo 
+    do filename, mas você pode especificar um nome diferente ou uma estrutura de diretórios. Isso é útil para organizar os arquivos no .zip ou evitar duplicação de nomes.
+
+    compress_type: tipo de compressão a ser usado. Por padrão, ele utiliza o valor definido
+    ao criar o objeto ZipFile, mas pode ser sobrescrito aqui. Os valores comuns são:
+
+    zipfile.ZIP_STORED: sem compressão, apenas armazenamento.
+    zipfile.ZIP_DEFLATED: compressão usando o algoritmo deflate (requer o módulo zlib).
+    zipfile.ZIP_BZIP2: compressão BZIP2 (requer o módulo bz2).
+    zipfile.ZIP_LZMA: compressão LZMA (requer o módulo lzma).
+    
+    compresslevel: define o nível de compressão, geralmente entre 0 (nenhuma compressão) 
+    e 9 (compressão máxima), mas o intervalo exato pode variar dependendo do tipo 
+    de compressão. Este parâmetro foi introduzido no Python 3.7.
+
+4 - Ações e Manipulações Básicas
+
+(a) Lendo o contéudo do arquivo Zip com Python:
+
+    from zipfile import Zipfile 
+
+        with ZipFile('meu_arquivo.zip', 'r') as meu_zip:
+        # Lista todos os arquivos dentro do ZIP
+        print(meu_zip.namelist())
+
+(b) Criando um novo arquivo Zip e adcionar  arquivos  a ele
+
+    from zipfile import ZipFile
+
+        # Cria um novo arquivo ZIP e adicionar arquivos
+        with ZipFile('novo_arquivo.zip', 'w') as meu_zip:
+        meu_zip.write('arquivo1.txt')
+        meu_zip.write('arquivo2.txt')
+
+(c) Extrair Arquivos de um Zip
+
+    form zipfile import Zipfile 
+        with ZipFile('meu_arquivo.zip', 'r') as meu_zip:
+        meu_zip.extract('arquivo1.txt', 'pasta_destino')  # Extrai um arquivo específico
+        meu_zip.extractall('pasta_destino')  # Extrai todos os arquivos
+
+(d) Adicionando arquivos a um arquivo.zip Existente 
+    
+    from zipfile import Zipefile    
+        
+        with ZipFile('meu_arquivo.zip', 'a') as meu_zip:
+        meu_zip.write('novo_arquivo.txt')
+
+        
+    Notas importates! 
+    # O with é uma estrutura de controle que facilita o gerenciamento de recursos, 
+    como arquivos, conexões de banco de dados, e outros objetos que precisam ser abertos 
+    e fechados.
+    
+    Gerenciamento Automático: O with garante que o recurso será fechado automaticamente 
+    ao final do bloco, mesmo que ocorra um erro durante a execução do código. 
+    Isso evita vazamentos de memória e garante que o recurso não fique aberto 
+    desnecessariamente.
+
+    Sintaxe Limpa: O uso do with torna o código mais legível e conciso. 
+    Você não precisa se preocupar em fechar manualmente o recurso.
+
+    # O as é usado para atribuir um nome (ou alias) a um objeto dentro do bloco do with. 
+    Isso é útil para tornar o código mais claro e legível, especialmente quando o objeto 
+    é um pouco complicado ou se o nome original é longo.
