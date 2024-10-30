@@ -1,6 +1,6 @@
 import zipfile
 import pandas as pd 
-import psycopg2 
+
 
 # Caminho para o arquivo .zip
 caminho_zip = r"C:\Users\FABIA\Downloads\202403_NovoBolsaFamilia.zip"
