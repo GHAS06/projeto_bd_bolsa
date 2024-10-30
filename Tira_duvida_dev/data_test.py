@@ -12,6 +12,7 @@ with zipfile.ZipFile(caminho_zip, 'r') as meu_zip:
     # Lendo o arquivo CSV dentro do .zip com pandas
     with meu_zip.open('202403_NovoBolsaFamilia.csv') as arquivo_csv:
         # Tentando ler o CSV com uma codificação diferente
-        df = pd.read_csv(arquivo_csv, encoding='ISO-8859-1', nrows= 1000)  # ou 'latin1'    
+        df = pd.read_csv(arquivo_csv, delimiter=';', encoding='ISO-8859-1', nrows= 1000)  # ou 'latin1'    
     
-    print(df)
+    #print(df.head()) # vai retornar as 5 primeiras linhas 
+    print (df.info()) 
