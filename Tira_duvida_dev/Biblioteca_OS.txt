@@ -1,0 +1,52 @@
+O que é a blibioteca OS?
+    Basicamente é uma biblioteca de comandos do sistema operacional que vai te auxiliar 
+    a fazer algumas operações dentro do seu computador. Essa biblioteca é muito utilizada 
+    para fazer automação de processos no Python, então você pode fazer algumas automações 
+    no seu computador de forma fácil e rápida!
+    
+    Ela muito útil quando se trata de interagir com o sistema operacional. Fornece uma 
+    série de funcionalidades para executar ações específicas, como navegar por diretórios,
+    criar novos diretórios, executar comandos no terminal e obter informações do sistema.
+
+            PRINCIPAIS OBJETOS E MAIS UTILIZADOS DO MÓDULO OS PARA COMEÇAR A APRENDER
+
+    Para começar, você pode focar nas funções mais utilizadas, sem precisar estudar toda
+    a biblioteca. Algumas áreas principais incluem:
+
+    Manipulação de Arquivos e Diretórios:
+
+os.open(path, flags, mode=0o777, *, dir_fd=None) ->  é uma função de baixo nível que
+interage diretamente com o sistema operacional, enquanto open() 
+(a função embutida do Python) oferece abstrações de nível mais alto 
+(como o gerenciamento automático de fechamento e abertura).
+
+os.close(fd) -> Fecha o descritor de arquivo fd
+
+os.getcwd() -> obtém o diretório de trabalho atual.
+
+os.listdir() -> lista arquivos e diretórios no caminho especificado.
+
+os.mkdir(), os.makedirs() -> cria diretórios.
+
+os.remove(), os.rmdir(), os.removedirs() -> remove arquivos e diretórios.
+
+    Caminhos de Arquivos (especialmente útil para compatibilidade entre sistemas):
+
+os.path.join(): combina caminhos de forma segura.
+
+os.path.exists(), os.path.isfile(), os.path.isdir() -> verificam a existência e tipo de
+arquivos ou diretórios.
+
+    Variáveis de Ambiente:
+
+os.getenv() -> obtém o valor de uma variável de ambiente.
+
+os.environ -> acessa e define variáveis de ambiente, útil para gerenciar configurações 
+sem expor senhas no código.
+
+Execução de Comandos no Sistema (avançado, mas útil em automação):
+
+os.system() -> executa comandos do sistema operacional diretamente.
+
+os.exec*() e os.spawn*() -> para processos mais complexos.
+

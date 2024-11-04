@@ -94,8 +94,8 @@ caminho_zip = "c:/pasta1/meu_zip.zip"
     
     ZipFile.namelist() -> Retorna uma lista de membros do arquivo por nome.
 
-    ZipFile.extract(member, path=None, pwd=None) ->  é utilizado para extrair um arquivo específico 
-    dentro de um arquivo .zip
+    ZipFile.extract(member, path=None, pwd=None) ->  é utilizado para extrair um arquivo 
+    específico dentro de um arquivo .zip
     
     member: é o nome ou o caminho relativo do arquivo dentro do .zip que você deseja extrair. 
     Ele deve corresponder ao caminho do arquivo dentro do .zip, e é obrigatório.
