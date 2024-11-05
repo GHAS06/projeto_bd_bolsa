@@ -28,10 +28,10 @@ caminho_zip = "c:/pasta1/meu_zip.zip"
         arquivo, # é o o caminho onde está o seu arquivo.zip
         modo='r', # basicamente define como você ira manipular seu o arquivo.zip
         compactação=ZIP_STORED, # Define o método de compactação 
-        allowZip64=Verdadeiro, # Permite criar arquivos.zip Maior que 4GB 
-        nível de compactação=Nenhum, # Controle o nível de compactação
+        allowZip64=True, # Permite criar arquivos.zip Maior que 4GB 
+        nível de compactação=None, # Controle o nível de compactação
         *, 
-        strict_timestamps=Verdadeiro, metadata_encoding=Nenhum
+        strict_timestamps=True, metadata_encoding=None
     ):
 
     Módulo (zipfile): É o pacote que você importa, contendo todas as funcionalidades para 

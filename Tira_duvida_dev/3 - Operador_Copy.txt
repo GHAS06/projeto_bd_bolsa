@@ -1,0 +1,110 @@
+                OPERADOR COPY E COPY FROM DO PSYCOPG3
+
+O COPY permite operações de leitura e gravação de dados diretamente entre tabelas e
+o sistema de arquivos do PostgreSQL. Ele opera com as funções COPY ... FROM STDIN 
+(carregar dados para o banco) e COPY ... TO STDOUT (exportar dados do banco), 
+e no psycopg3, essas operações são acessadas pelo método cursor.copy(). 
+O uso ideal dessa função ocorre dentro de um bloco with, onde gerenciamos o objeto copy 
+para passar dados (com write() ou write_row()) ou ler dados (com read() ou read_row()).
+
+                Exemplo Carregar dados para uma tabela: 
+
+with cursor.copy("COPY table_name (col1, col2) FROM STDIN") as copy:
+    copy.write_row((10, 20))  # Carrega uma linha com valores (10, 20)
+
+                    Composição Dinâmica de COPY
+
+O módulo psycopg.sql permite construir consultas dinamicamente:
+
+with cursor.copy(
+    sql.SQL("COPY {} TO STDOUT").format(sql.Identifier("table_name"))
+) as copy:
+    data = copy.read_row()  # Lê uma linha por vez
+
+A partir da versão 3.1, copy() também aceita parâmetros, como em execute(),
+permitindo consultas mais flexíveis.
+
+                        Controle de Transações
+
+A operação COPY respeita o comportamento transacional, ou seja, ela só será efetivada ao 
+dar commit. Caso o autocommit esteja desativado, é necessário realizar commit manualmente.
+
+                    Gravação de Dados Linha a Linha
+
+Para inserir dados, você pode usar qualquer iterável em Python (listas de tuplas, etc.).
+No exemplo abaixo, copy.write_row() insere cada registro da lista records:
+
+records = [(10, 20, "hello"), (40, None, "world")]
+with cursor.copy("COPY sample (col1, col2, col3) FROM STDIN") as copy:
+    for record in records:
+        copy.write_row(record)
+
+Em caso de erro, a operação será cancelada e os dados já inseridos serão descartados.
+
+Nota: Para operações row-by-row, é recomendado não especificar opções de COPY como FORMAT 
+CSV ou DELIMITER.
+
+                    Leitura de Dados Linha a Linha
+
+O método rows() permite ler dados linha a linha:
+
+with cur.copy("COPY (VALUES (10::int, current_date)) TO STDOUT") as copy:
+    for row in copy.rows():
+        print(row)  # Saída: ('10', 'data_formatada')
+
+Para melhorar o formato dos dados lidos, o método set_types() especifica os tipos de dados
+esperados, convertendo valores como texto para os tipos reais
+
+                        Cópia em Blocos
+
+Para carregar dados pré-formatados (por exemplo, de um arquivo resultante de um COPY TO),
+copy.write() é utilizado em um loop:                       
+
+with open("data", "r") as f:
+    with cursor.copy("COPY data FROM STDIN") as copy:
+        while data := f.read(BLOCK_SIZE):
+            copy.write(data)
+
+Nesse caso, você pode usar qualquer formato de COPY, desde que os dados estejam compatíveis.
+
+Para exportar dados, o uso do COPY ... TO STDOUT com write() permite salvar dados em um 
+arquivo binário:
+
+with open("data.out", "wb") as f:
+    with cursor.copy("COPY table_name TO STDOUT") as copy:
+        for data in copy:
+            f.write(data)
+
+                        Cópia Binária
+
+Ao especificar FORMAT BINARY, é possível realizar uma cópia binária para melhor desempenho.
+Um detalhe importante é que, no modo binário, o PostgreSQL não aplica regras de conversão:
+é preciso garantir que os tipos de dados sejam exatos, usando set_types() para ajustar os
+tipos.
+
+                     Suporte Assíncrono para COPY
+
+A versão assíncrona permite operações COPY usando objetos AsyncConnection e AsyncCopy.
+
+Exemplo:
+
+async with cursor.copy("COPY data FROM STDIN") as copy:
+    while data := await f.read():
+        await copy.write(data)
+
+                Exemplo: Copiando Tabelas Entre Servidore
+
+Para copiar dados entre dois servidores, uma conexão é aberta em cada servidor,
+e duas operações COPY são executadas: uma leitura COPY TO STDOUT em um servidor e uma
+gravação COPY FROM STDIN no outro:
+
+with psycopg.connect(dsn_src) as conn1, psycopg.connect(dsn_tgt) as conn2:
+    with conn1.cursor().copy("COPY src TO STDOUT (FORMAT BINARY)") as copy1:
+        with conn2.cursor().copy("COPY tgt FROM STDIN (FORMAT BINARY)") as copy2:
+            for data in copy1:
+                copy2.write(data)
+
+A FORMAT BINARY é usada para melhorar a performance. Esse tipo de cópia só funciona se
+os esquemas forem idênticos nos dois servidores.
+
+        
