@@ -12,6 +12,7 @@ caminho_zip = os.path.join(caminho_downloads, "202403_NovoBolsaFamilia.zip")
 
 # Etapa 1: Extrair o arquivo CSV de dentro do arquivo .zip
 with zipfile.ZipFile(caminho_zip, 'r') as zip_ref:
+    start_time = time.time()
     # Listando o primeiro arquivo que está no zip
     arq_csv = zip_ref.namelist()[0]
     print(f"Listando o arquivo.csv: {arq_csv}")    
@@ -19,6 +20,9 @@ with zipfile.ZipFile(caminho_zip, 'r') as zip_ref:
     # Extraindo o arquivo para a pasta Downloads
     zip_ref.extract(arq_csv, caminho_downloads)
     print(f"Arquivo extraído para o caminho: {os.path.join(caminho_downloads, arq_csv)}")
+    time_end = time.time()
+    real_time = time_end - start_time
+    print(f'tempo de extração de {real_time}')
 
 # Caminho completo do CSV extraído
 caminho_csv_extraido = os.path.join(caminho_downloads, arq_csv)
@@ -55,6 +59,7 @@ try:
     print("Conexão realizada!\n")
     print("Inicio da Exportação dos dados...")
     # Iterar sobre o arquivo em chunks
+    start_time = time.time()
     for i, chunk in enumerate(pd.read_csv(caminho_csv_extraido, delimiter=';', encoding='latin1', chunksize=1000000)):
         # Se for o primeiro chunk, insira com o cabeçalho; caso contrário, ignore-o
         if i > 0:
@@ -78,7 +83,9 @@ try:
         time.sleep(3)
 except Exception as e:
     print(f"Ocorreu um erro ao inserir os dados: {e}")
-
+time_end = time.time() 
+real_time = time_end - start_time
+print(f'tempo de importção de{real_time}')
 # Remover o arquivo CSV extraído após a operação
 os.remove(caminho_csv_extraido)
 print("Arquivo CSV removido com sucesso.")
