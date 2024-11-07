@@ -15,8 +15,6 @@ CREATE TABLE IF NOT EXISTS pagamentos (
 	Drop caso dê erros de importação de dados
 	DROP TABLE pagamento
 */
--- contabilizando o total de registros que existem na tabela
-SELECT COUNT(valor_parcela)  FROM pagamentos;
 
 /* Forma padrão de contabilizar valores null de uma tabela*/
 SELECT COUNT(cpf_beneficiario) AS cpf_null FROM pagamentos AS p 
@@ -33,7 +31,7 @@ FROM pagamentos
 WHERE cpf_beneficiario IS NULL OR cpf_beneficiario = '' OR cpf_beneficiario ~ '^\s*$';
 
 /* Selecionando todos os dados da tabela pagamentos*/
-SELECT * FROM pagamentos;
+SELECT Count(*) FROM pagamentos;
 
 /*Descobrindo o nome de municípios e seus respectivos UF*/
 
