@@ -31,7 +31,7 @@ FROM pagamentos
 WHERE cpf_beneficiario IS NULL OR cpf_beneficiario = '' OR cpf_beneficiario ~ '^\s*$';
 
 /* Selecionando todos os dados da tabela pagamentos*/
-SELECT Count(*) FROM pagamentos;
+SELECT COUNT(*) FROM pagamentos;
 
 /*Descobrindo o nome de municípios e seus respectivos UF*/
 
@@ -63,6 +63,16 @@ SELECT COUNT(*) FROM pagamentos WHERE nome_municipio = 'BRASILIA';
 SELECT COUNT(*) FROM pagamentos WHERE nome_municipio = 'SALVADOR';
 -- retornou 292.214 dados em 14.72s
 
+-- Mesma coisa do de cima kkk
+SELECT nome_municipio, COUNT(nome_beneficiario) FROM pagamentos
+	WHERE nome_municipio IN('SAO PAULO','BRASILIA','SALVADOR')
+		GROUP BY nome_municipio;
+
+-- Contabilizar total de parcelas pagas as cidades BRASILIA, SAO PAULO, SALVADOR
+SELECT nome_municipio, SUM(valor_parcela) FROM pagamentos
+	WHERE nome_municipio IN('SAO PAULO','BRASILIA','SALVADOR')
+		GROUP BY nome_municipio;
+
 /*Retorna a soma total de parcela por munícipio, ordenado em ordem alfabetica */
 SELECT nome_municipio, uf, SUM(valor_parcela) AS total_valor_pago
 FROM pagamentos
@@ -84,4 +94,28 @@ GROUP BY cpf_beneficiario
 HAVING COUNT(*) > 1
 ORDER BY quantidade DESC;
 -- Retornou resultado em 1 min e 51s, retornou 3.515.664 de valores null
+
+-- Retornando o valor total de parcelas pagas por estado
+SELECT DISTINCT uf, SUM(valor_parcela) FROM pagamentos 
+	WHERE uf IN(
+	'AC','AL','AM',
+	'AP','BA','CE',
+	'DF','ES','GO',
+	'MA','MG','MS',
+	'MT','PA','PB',
+	'PE','PI','PR',
+	'RJ','RN','RO',
+	'RR','RS','SC',
+	'SE','SP','TO'
+	) 
+	GROUP BY uf;
+-- DF 121.619.766.00
+
+SELECT uf, SUM(valor_parcela) FROM pagamentos WHERE uf = 'DF' GROUP BY uf;
+-- 121,619,766.00
+
+-- contabilizando o valor total de  todas as parcelas pagas 
+SELECT SUM(valor_parcela)  FROM pagamentos;
+-- 13,373,651,126.00
+
 
