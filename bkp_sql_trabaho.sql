@@ -11,10 +11,10 @@ CREATE TABLE IF NOT EXISTS pagamentos (
     nome_beneficiario VARCHAR(100),
     valor_parcela DECIMAL(10, 2)
 );
-/*
-	Drop caso dê erros de importação de dados
-	DROP TABLE pagamento
-*/
+
+--Drop caso dê erros de importação de dados
+--DROP TABLE pagamentos;
+
 
 /* Forma padrão de contabilizar valores null de uma tabela*/
 SELECT COUNT(cpf_beneficiario) AS cpf_null FROM pagamentos AS p 
@@ -95,8 +95,8 @@ HAVING COUNT(*) > 1
 ORDER BY quantidade DESC;
 -- Retornou resultado em 1 min e 51s, retornou 3.515.664 de valores null
 
--- Retornando o valor total de parcelas pagas por estado
-SELECT DISTINCT uf, SUM(valor_parcela) FROM pagamentos 
+-- Retornando o valor total de parcelas pagas por estado em ordem de maior valor para menor valor
+SELECT DISTINCT uf, SUM(valor_parcela) AS total_valor_parcela FROM pagamentos 
 	WHERE uf IN(
 	'AC','AL','AM',
 	'AP','BA','CE',
@@ -108,7 +108,8 @@ SELECT DISTINCT uf, SUM(valor_parcela) FROM pagamentos
 	'RR','RS','SC',
 	'SE','SP','TO'
 	) 
-	GROUP BY uf;
+	GROUP BY uf
+	ORDER BY total_valor_parcela DESC;
 -- DF 121.619.766.00
 
 SELECT uf, SUM(valor_parcela) FROM pagamentos WHERE uf = 'DF' GROUP BY uf;
