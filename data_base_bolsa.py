@@ -3,6 +3,15 @@ import pandas as pd
 from sqlalchemy import create_engine
 import time
 import os
+import psutil
+import time
+
+# Define a prioridade do processo atual
+processo_atual = psutil.Process(os.getpid())
+processo_atual.nice(psutil.HIGH_PRIORITY_CLASS)   # Para prioridade alta
+
+# Informa o PID do nosso processo
+print(f"Processo em execução com PID: {os.getpid()}")
 
 # Caminho para a pasta Downloads
 caminho_downloads = r"C:\Users\FABIA\Downloads"
@@ -13,7 +22,6 @@ caminho_zip = os.path.join(caminho_downloads, "202403_NovoBolsaFamilia.zip")
 # Etapa 1: Extrair o arquivo CSV de dentro do arquivo .zip
 with zipfile.ZipFile(caminho_zip, 'r') as zip_ref:
     start_time = time.time()
-    # Listando o primeiro arquivo que está no zip
     arq_csv = zip_ref.namelist()[0]
     print(f"Listando o arquivo.csv: {arq_csv}")    
     
@@ -27,13 +35,21 @@ with zipfile.ZipFile(caminho_zip, 'r') as zip_ref:
 # Caminho completo do CSV extraído
 caminho_csv_extraido = os.path.join(caminho_downloads, arq_csv)
 
-# Etapa 2: Carregar o arquivo CSV usando o Pandas com delimitador correto
+# Pré-processamento do arquivo
+with open(caminho_csv_extraido, 'r', encoding='latin1') as file:
+    content = file.read()
+    content = content.replace(',', '.')  # Substitui todas as vírgulas por pontos
 
-# Carregar somente o cabeçalho para definir o DataFrame corretamente
-df = pd.read_csv(caminho_csv_extraido, delimiter=';', encoding='latin1', nrows=0)
+with open(caminho_csv_extraido, 'w', encoding='latin1') as file:
+    start_time = time.time()
+    file.write(content)
+    time_end = time.time()
+    real_time = time_end - start_time
+    print(f'Tempo de pré-processamento: {real_time:.2f} segundos')
 
-# Limpar os nomes das colunas (remover aspas e espaços extras)
-df.columns = df.columns.str.replace('"', '', regex=True).str.strip().str.replace(';', '', regex=True)
+
+# Carregar o CSV para um DataFrame sem forçar o tipo de dado inicialmente
+df = pd.read_csv(caminho_csv_extraido, delimiter=';', encoding='latin1')
 
 # Renomear as colunas conforme necessário
 df.rename(columns={
@@ -48,6 +64,9 @@ df.rename(columns={
     'VALOR PARCELA': 'valor_parcela'
 }, inplace=True)
 
+# Tratar a coluna 'valor_parcela' corretamente
+df['valor_parcela'] = pd.to_numeric(df['valor_parcela'].astype(str).str.replace(',', '.'), errors='coerce')
+
 # Conectar ao banco de dados PostgreSQL
 user = 'postgres'
 password = '32481024'
@@ -58,47 +77,33 @@ engine = create_engine(f'postgresql+psycopg2://{user}:{password}@{host}/{databas
 # Variável para contar o total de linhas importadas
 total_linhas_importadas = 0
 
-# Etapa 3: Inserir os dados no banco de dados em lotes com pausa, ignorando o cabeçalho após o primeiro lote
+# Etapa 3: Inserir os dados no banco de dados em lotes com pausa
 try:
-    print("Conexão realizada!\n")
-    print("Início da importação dos dados...")
-
-    # Iterar sobre o arquivo em chunks
+    print("Conexão realizada!\nInício da exportação dos dados...")
     start_time = time.time()
-    for i, chunk in enumerate(pd.read_csv(caminho_csv_extraido, delimiter=';', encoding='latin1', header = None, chunksize=1000000)):
-        # Atribuir os nomes das colunas do df principal a cada chunk
-        chunk.columns = df.columns
 
-        # Verificar as colunas do chunk antes de manipular 'valor_parcela'
-        print(f"Colunas no chunk {i+1}: {chunk.columns}")
+    for i, chunk in enumerate(pd.read_csv(caminho_csv_extraido, delimiter=';', encoding='latin1', chunksize=1000000)):
+        chunk.columns = df.columns  # Garantir que as colunas estejam corretas
         
-        # Verifique a existência da coluna 'valor_parcela' e aplique a conversão
-        if 'valor_parcela' in chunk.columns:
-            # Corrigir vírgulas e converter para float usando pd.to_numeric com erro 'coerce'
-            chunk['valor_parcela'] = pd.to_numeric(chunk['valor_parcela'].str.replace(',', '.', regex=False), errors='coerce')
-        else:
-            print(f"Coluna 'valor_parcela' não encontrada no chunk {i+1}. Pulando para o próximo chunk.")
-            continue  # Pula para o próximo chunk
-
+        # Garantir que 'valor_parcela' seja numérico (sem necessidade de manipular novamente com .str.replace)
+        chunk['valor_parcela'] = pd.to_numeric(chunk['valor_parcela'].astype(str).str.replace(',', '.'), errors='coerce')
+        
         # Inserir no banco
-        chunk.to_sql('pagamentos', engine, if_exists='append', index=False)
+        chunk.to_sql('pagamentos', engine, if_exists='append', index=False )
         
-        # Incrementar o total de linhas importadas
         total_linhas_importadas += len(chunk)
-        
         print(f"Lote {i + 1} inserido com sucesso. Total de linhas importadas até agora: {total_linhas_importadas}")
-        
-        # Pausa de 3 segundos entre os lotes
         time.sleep(3)
+
 except Exception as e:
     print(f"Ocorreu um erro ao inserir os dados: {e}")
 
-# Medir o tempo total de importação
-time_end = time.time() 
+# Tempo total de importação
+time_end = time.time()
 real_time = time_end - start_time
 print(f'Tempo de importação: {real_time:.2f} segundos')
 
-# Exibir o total de linhas importadas ao final do processo
+# Exibir o total de linhas importadas
 print(f"Total de linhas importadas: {total_linhas_importadas}")
 
 # Remover o arquivo CSV extraído após a operação
