@@ -1,0 +1,491 @@
+                        INTRODUÇÃO RÁPIDA
+
+Nota -> Tudo o que eu escrever aqui tem como base a documentação oficil:
+   
+    Https://www.psycopg.org/psycopg3/docs/basic/install.html#installation
+
+                        O que é o Psycopg 3?
+
+Psycopg 3 é uma biblioteca de driver que permite a interação com bancos de dados PostgreSQL
+a partir de aplicações Python. Ele fornece um conjunto robusto de recursos para realizar 
+operações de CRUD, transações e manipulação avançada de dados. Comparado ao Psycopg 2, 
+ele traz funcionalidades de programação assíncrona e uma arquitetura mais moderna.
+
+                    Instalação do Psycopg 3
+
+Para instalar o Psycopg 3, você pode usar o pip:
+
+1- pip install psycopg[binary]
+
+                Conexão Básica com o Banco de Dados
+
+Aqui, vamos ver uma conexão básica e execução de consultas simples com Psycopg 3:
+
+import psycopg
+
+# Conectando ao banco de dados
+
+conn = psycopg.connect(
+    "dbname=seu_banco,
+    user=seu_usuario,
+    password= sua_senha
+    host= localhost")
+
+# Criando um cursor
+cur = conn.cursor()
+
+# Executando uma consulta
+cur.execute("SELECT * FROM sua_tabela")
+
+# Obtendo resultados
+for row in cur.fetchall():
+    print(row)
+
+# Fechando a conexão
+cur.close()
+conn.close()
+
+                Operações Básicas (INSERT, UPDATE, DELETE)
+
+Psycopg 3 permite executar operações padrão como INSERT, UPDATE e DELETE de maneira
+muito semelhante ao Psycopg 2.
+
+# Inserindo dados
+cur.execute("INSERT INTO sua_tabela (coluna1, coluna2) VALUES (%s, %s)", ("valor1", "valor2"))
+conn.commit()  # Confirmando a transação
+
+# Atualizando dados
+cur.execute("UPDATE sua_tabela SET coluna1 = %s WHERE coluna2 = %s", ("novo_valor", "valor2"))
+conn.commit()
+
+# Deletando Dados
+cur.execute("DELETE FROM sua_tabela WHERE coluna1 = %s", ("valor1",))
+conn.commit()
+
+                Operações Intermediárias: Transações e Blocos de Erro
+
+Para garantir que todas as operações sejam realizadas de maneira atômica, você pode usar 
+blocos de transações e também controlar erros.
+
+try:
+    with conn.transaction():  # Abre uma transação
+        cur.execute("INSERT INTO tabela (coluna) VALUES (%s)", ("valor",))
+        cur.execute("INSERT INTO tabela (coluna) VALUES (%s)", ("valor2",))
+    conn.commit()  # Confirma tudo
+except Exception as e:
+    conn.rollback()  # Reverte em caso de erro
+    print("Erro:", e)
+
+            Operação Avançada: Utilizando o COPY para Importação de Dados:
+
+O comando COPY é altamente eficiente para importação de dados, especialmente para grandes
+volumes. Ele permite transferir dados diretamente entre o banco de dados e arquivos CSV.
+
+                                EXEMPLO:
+
+Primeiro, crie um arquivo CSV chamado dados.csv com dados para importar:
+Dentro do dados.csv :
+            
+            coluna1,coluna2,coluna3
+            valor1,valor2,valor3
+            valor4,valor5,valor6
+
+Em seguida, use o COPY para importar os dados:    
+    
+    with conn.cursor() as cur:
+    with open("dados.csv", "r") as f:
+        cur.copy_from(f, "sua_tabela", sep=",")
+    conn.commit()
+
+----------------------------------------------------------------------------------------------
+                
+                APROFUNDAMENTO SOBRE PSYCOPG3
+
+INSTALAÇÃO -> Podemos utilizar os seguintes comandos para utilizar o psycopg 3 
+
+pip install --upgrade pip           # upgrade pip to at least 20.3
+pip install "psycopg[binary]"       # remove [binary] for PyPy
+
+Para saber qual a sua máquina suporta, utilize a documentação oficial:
+
+https://www.psycopg.org/psycopg3/docs/basic/install.html#installation
+
+                    USO BÁSICO DO MÓDULO
+
+O uso básico do Psycopg é comum a todos os adaptadores de banco de dados que implementam
+o protocolo DB-API. Outros adaptadores de banco de dados, como o builtin ou , têm
+aproximadamente o mesmo padrão de interação.
+            
+                    PRINCIPAIS OBJETOS
+
+# Note: the module name is psycopg, not psycopg3
+import psycopg
+
+# Connect to an existing database
+with psycopg.connect("dbname=test user=postgres") as conn:
+
+    # Open a cursor to perform database operations
+    with conn.cursor() as cur:
+
+        # Execute a command: this creates a new table
+        cur.execute("""
+            CREATE TABLE test (
+                id serial PRIMARY KEY,
+                num integer,
+                data text)
+            """)
+
+        # Pass data to fill a query placeholders and let Psycopg perform
+        # the correct conversion (no SQL injections!)
+        cur.execute(
+            "INSERT INTO test (num, data) VALUES (%s, %s)",
+            (100, "abc'def"))
+
+        # Query the database and obtain data as Python objects.
+        cur.execute("SELECT * FROM test")
+        cur.fetchone()
+        # will return (1, 100, "abc'def")
+
+        # You can use `cur.fetchmany()`, `cur.fetchall()` to return a list
+        # of several records, or even iterate on the cursor
+        for record in cur:
+            print(record)
+
+        # Make the changes to the database persistent
+        conn.commit()
+
+                                VEJA!
+
+primeira linha ->  é a importação do módulo psycopg:
+
+1 - import psycopg
+
+Essa importação traz o módulo psycopg, que é necessário para interagir com o banco de dados
+PostgreSQL. Esse módulo oferece métodos para conectar, consultar e manipular dados em um 
+banco PostgreSQL usando Python.
+
+Conectando ao Banco de Dados
+
+A linha seguinte cria uma conexão com o banco de dados usando um contexto (with),
+o que garante que a conexão será fechada automaticamente ao final do bloco:
+
+    with psycopg.connect("dbname=test user=postgres") as conn:
+
+explicação dos parâmetros:
+
+dbname=test: Indica que o banco de dados a ser usado se chama test.
+user=postgres: Define o usuário PostgreSQL postgres para a conexão.
+
+O a função psycopg.connect() retorna um objeto de conexão, chamado conn, que permite 
+interagir com o banco.
+
+Abrindo um Cursor para Operações no Banco
+
+Depois de criar a conexão, um cursor é aberto para executar comandos SQL:
+
+    with conn.cursor() as cur:
+
+esse "as" serve para nomear o objeto craido após a materialização do classe dentro dele.
+O cursor (cur) serve como uma "ponte" para enviar comandos SQL ao banco de dados e buscar
+resultados. Ele é aberto usando outro contexto (with), o que também garante o fechamento do
+cursor automaticamente ao final do bloco.
+
+Criando uma Tabela
+
+A primeira operação executada com o cursor é a criação de uma tabela chamada test:
+
+cur.execute("""
+    CREATE TABLE test (
+        id serial PRIMARY KEY,
+        num integer,
+        data text)
+""")
+
+Este comando SQL CREATE TABLE cria uma nova tabela com as seguintes colunas:
+
+id serial PRIMARY KEY: Coluna do tipo serial, que incrementa automaticamente a cada registro e serve como chave primária.
+num integer: Coluna do tipo integer para armazenar números inteiros.
+data text: Coluna do tipo text para armazenar strings de texto.
+O método cur.execute() envia essa instrução ao banco de dados.
+
+Inserindo Dados Usando Placeholders
+
+pós criar a tabela, a próxima etapa é inserir dados na tabela test
+
+cur.execute(
+    "INSERT INTO test (num, data) VALUES (%s, %s)",
+    (100, "abc'def"))
+
+Explicação dos parâmetros:
+
+A consulta INSERT INTO test (num, data) VALUES (%s, %s) insere valores nas colunas num 
+e data da tabela test.
+
+Os placeholders %s são substituídos pelos valores 100 e "abc'def" passados como uma tupla
+(100, "abc'def") no segundo argumento de execute().
+
+Segurança: O Psycopg trata automaticamente os valores passados para evitar SQL injection. 
+Qualquer caractere especial no texto, como o apóstrofo em "abc'def", será corretamente
+escapado.
+
+Consultando Dados e Obtendo Resultados
+
+Para obter dados da tabela, usamos uma consulta SELECT:
+
+cur.execute("SELECT * FROM test")
+
+Essa linha executa a instrução SQL para buscar todos os registros da tabela 
+
+Buscando e Imprimindo Dados
+
+cur.fetchone() -> retorna o próximo registro da consulta como uma tupla de Python.
+
+cur.fetchall() -> O método fetchall() recupera todos os registros restantes no conjunto 
+de resultados e os retorna como uma lista de tuplas.
+
+cur.fetchmany() -> O método fetchmany(size=n) permite recuperar um número limitado 
+de registros por vez.
+
+No exemplo, o primeiro registro inserido retornará como (1, 100, "abc'def"), onde:
+
+1 é o id gerado automaticamente (como serial).
+100 é o valor na coluna num.
+"abc'def" é o valor na coluna data.
+Alternativamente, você pode usar:
+
+cur.fetchmany(size=n) para buscar n registros.
+cur.fetchall() para buscar todos os registros restantes.
+
+Iteração sobre o Cursor
+
+Para imprimir todos os registros, é possível iterar diretamente sobre o cursor:
+
+for record in cur:
+    print(record)
+
+Confirmando as Alterações com conn.commit()
+
+Para garantir que as operações de criação de tabela e inserção de dados sejam aplicadas
+no banco, é necessário confirmar as transações com o método commit():
+
+conn.commit()
+
+O commit() grava definitivamente as mudanças no banco. Sem ele, operações como 
+CREATE TABLE e INSERT seriam desfeitas ao encerrar a conexão.
+
+                        RESUMO DO PROCESSO! 
+
+Conexão: Cria a conexão com o banco.
+Cursor: Abre um cursor para interagir com o banco.
+Execução de SQL: Cria a tabela e insere dados usando comandos SQL.
+Consulta: Recupera e imprime registros da tabela.
+Commit: Confirma as operações de inserção e criação de tabela.
+Fechamento Automático: Como with foi usado, tanto o cursor quanto a conexão são fechados
+automaticamente ao final. com isso não é necessário usar o conn.close() para o fechamento
+manual
+
+                        PASSEGEM DE PARÂMETROS!
+
+Ao desenvolver em Python com SQL, muitas vezes será necessário inserir valores dinâmicos
+na consulta SQL. A maneira correta de fazer isso em psycopg é usar placeholders %s em vez 
+de concatenar strings diretamente, o que evita falhas e vulnerabilidades como injeção de
+SQL.
+
+                            Exemplo: 
+
+cur.execute("""
+    INSERT INTO some_table (id, created_at, last_name)
+    VALUES (%s, %s, %s);
+    """,
+    (10, datetime.date(2020, 11, 18), "O'Reilly"))
+
+Neste exemplo, o execute() usa %s como placeholders e um segundo argumento com os valores
+a serem inseridos. Os dados são enviados ao servidor separadamente, o que evita problemas
+de segurança e formatação.
+
+Parâmetros Nomeados
+
+Você também pode usar placeholders nomeados no formato %(nome)s. 
+Com isso, os valores são passados em forma de dicionário, permitindo flexibilidade:
+
+                            Exemplo:
+
+cur.execute("""
+    INSERT INTO some_table (id, created_at, updated_at, last_name)
+    VALUES (%(id)s, %(created)s, %(created)s, %(name)s);
+    """,
+    {'id': 10, 'name': "O'Reilly", 'created': datetime.date(2020, 11, 18)})
+
+Cuidados com Placeholders e Símbolos de Percentagem
+
+Para incluir uma porcentagem % literal em uma consulta, use %%.
+                        
+                            Exemplo:
+
+cur.execute("SELECT (%s %% 2) = 0 AS even", (10,))
+
+Práticas Incorretas e Injeção de SQL
+
+Evite concatenar strings ou usar o operador % para formar consultas SQL. Esse tipo de
+código não só pode falhar, mas também é altamente vulnerável a ataques de injeção SQL.
+Use apenas a passagem de parâmetros segura via execute().
+
+                        Exemplo incorreto e correto:
+
+cur.execute("INSERT INTO numbers VALUES (%s, %s)" % (10, 20)) # ERRADO
+cur.execute("INSERT INTO numbers VALUES (%s, %s)", (10, 20))  # CORRETO
+
+Bindings para Variáveis Únicas
+
+Mesmo ao passar uma única variável, é necessário definir a tupla ou lista adequadamente.
+                        
+                        Exemplo correto:
+
+cur.execute("INSERT INTO foo VALUES (%s)", ("bar",))  # Correto
+
+            USO DO MÓDULO psycopg.sql PARA NOMES DE TABELAS DINÂMICAS
+
+Para inserir nomes de tabelas ou colunas dinamicamente, utilize o módulo psycopg.sql.
+Ele fornece uma maneira segura de manipular esses valores:
+
+                            EXEMPLO:
+
+from psycopg import sql
+
+cur.execute(
+    sql.SQL("INSERT INTO {} VALUES (%s)").format(sql.Identifier('numbers')),
+    (10,))
+
+Conversão de Tipos de Dados e Parâmetros Binários
+
+O Psycopg lida automaticamente com a conversão de muitos tipos de dados,
+incluindo datetime e str. Ele também pode lidar com parâmetros binários ao especificar 
+o tipo de dado como %b ou %t (texto).
+
+cur.execute(
+    "SELECT image_data FROM images WHERE id = %s", [image_id], binary=True)
+data = cur.fetchone()[0]
+
+Ao usar o modo binário (binary=True), os dados são transmitidos em formato binário,
+o que é útil para grandes dados binários como imagens.
+
+Passar parâmetros corretamente no Psycopg é essencial para garantir a segurança
+e a confiabilidade da aplicação. Evite manipulações diretas de strings e use:
+placeholders ou o módulo psycopg.sql para construções dinâmicas seguras.
+
+
+                ADPTAÇÕES DOS TIPOS DE DADOS BÁSICOS NO PSYCOPG
+
+Adaptação dos Tipos Básicos no psycopg
+
+Booleans (Booleanos)
+
+Python: True e False
+PostgreSQL: boolean
+
+Exemplo:
+
+cur.execute("SELECT %s, %s", (True, False))  # Insere true e false no SQL
+
+Números (Inteiros e Decimais)
+
+Inteiros: Python int se converte automaticamente em smallint, integer, 
+bigint ou numeric dependendo do valor.
+
+Float: Valores em float do Python vão para o float8 no PostgreSQL.
+
+Decimal: Para precisão, valores Decimal do Python se convertem para numeric.
+
+Exemplo para usar float ao invés de numeric:
+
+from psycopg import connect
+
+conn = connect()
+conn.execute("INSERT INTO tabela (coluna) VALUES (%s)", [float(123.456)])
+Strings (Textos)
+
+Python str: Converte para text ou varchar no PostgreSQL. Certifique-se de usar UTF-8
+para caracteres especiais.
+
+Para strings em outros formatos (exemplo: latin9):
+
+conn.execute("SET client_encoding TO LATIN9")
+
+Binários
+
+Python bytes, bytearray, memoryview: Se convertem para bytea em PostgreSQL.
+Ideal para grandes dados binários como imagens ou documentos.
+
+Exemplo de uso para bytea:
+
+conn.execute("INSERT INTO tabela_binaria (imagem) VALUES (%s)", [b'\x00\x01\x02'])
+
+Datas e Horas
+
+Python date, datetime, time, timedelta: Adapta-se para date, timestamp, time e interval
+respectivamente.
+
+Importante: o PostgreSQL sempre armazena timestamptz em UTC e converte de acordo com o
+timezone da conexão.
+
+Exemplo:
+
+from datetime import datetime
+conn.execute("INSERT INTO eventos (data_evento) VALUES (%s)", [datetime.now()])
+
+JSON
+
+Python dict, list, e outros: Pode ser mapeado para json/jsonb.
+
+Use as bibliotecas Json ou Jsonb para adaptar objetos JSON:
+
+from psycopg.types.json import Jsonb
+
+data = {"chave": "valor"}
+conn.execute("INSERT INTO tabela_json (dados) VALUES (%s)", [Jsonb(data)])
+Listas (Arrays)
+
+Python list: Convertido automaticamente para arrays PostgreSQL se todos os itens forem
+do mesmo tipo.
+
+Nota: Para usar em operações IN, substitua por = ANY(...) no PostgreSQL:
+
+conn.execute("SELECT * FROM tabela WHERE id = ANY(%s)", [[1, 2, 3]])
+UUID
+
+Python UUID: Adapta-se ao tipo UUID do PostgreSQL.
+
+Exemplo:
+
+from uuid import uuid4
+
+conn.execute("INSERT INTO tabela_uuid (id) VALUES (%s)", [uuid4()])
+
+Adaptação para Tipos Complexos
+
+Tipos de Rede
+
+ipaddress (IPv4, IPv6): Usado com os tipos inet e cidr do PostgreSQL para armazenar endereços 
+IP e redes.
+
+Enumerações (Enums)
+
+Python Enum: Mapeado para tipos ENUM do PostgreSQL após registro.
+Como registrar e usar um tipo ENUM:
+
+from enum import Enum
+from psycopg.types.enum import EnumInfo, register_enum
+
+class Status(Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+
+conn.execute("CREATE TYPE status_enum AS ENUM ('active', 'inactive')")
+info = EnumInfo.fetch(conn, "status_enum")
+register_enum(info, conn, Status)
+
+conn.execute("INSERT INTO usuarios (status) VALUES (%s)", [Status.ACTIVE])
+
+Com esses exemplos e configurações, você terá um bom ponto de partida para adaptar os tipos
+de dados mais comuns entre Python e PostgreSQL usando o psycopg.
+
